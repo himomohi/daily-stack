@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="theme-color" content="#0c0e13" />
+    <link rel="icon" href="data:," />
+    <title>Daily Stack</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: #0c0e13;
+        color: #f4f6fb;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      #scene-container {
+        position: fixed;
+        inset: 0;
+      }
+      #landing {
+        position: fixed;
+        left: 50%;
+        bottom: max(16px, env(safe-area-inset-bottom, 0px));
+        transform: translateX(-50%);
+        box-sizing: border-box;
+        width: min(430px, calc(100vw - 32px));
+        padding: 18px 20px 16px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(20, 22, 28, 0.9);
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(12px);
+        text-align: center;
+        pointer-events: auto;
+      }
+      #landing.is-hidden {
+        display: none;
+      }
+      #landing .title {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+      }
+      #landing .pitch {
+        margin: 6px 0 0;
+        font-size: 14px;
+        line-height: 1.45;
+        color: #b7bdca;
+      }
+      #landing .streak {
+        margin: 10px 0 0;
+        font-size: 15px;
+        font-weight: 700;
+        color: #ffd447;
+      }
+      #landing .streak[hidden] {
+        display: none;
+      }
+      #enter-xr {
+        margin-top: 14px;
+        width: 100%;
+        padding: 13px 18px;
+        border: 0;
+        border-radius: 12px;
+        background: #4c8dff;
+        color: #06080d;
+        font: inherit;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 120ms ease;
+      }
+      #enter-xr:hover {
+        background: #6ea8ff;
+      }
+      #enter-xr:active {
+        background: #3f7ae0;
+      }
+      #landing .fallback {
+        margin: 14px 0 0;
+        font-size: 15px;
+        font-weight: 700;
+        color: #ffd447;
+      }
+      #landing .fallback[hidden] {
+        display: none;
+      }
+      #landing .note {
+        margin: 10px 0 0;
+        font-size: 12px;
+        line-height: 1.45;
+        color: #868d9c;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="scene-container"></div>
+
+    <div id="landing">
+      <p class="title">Daily Stack</p>
+      <p class="pitch">A 3-minute daily tower puzzle for your desk. Hands only.</p>
+      <p id="landing-streak" class="streak" hidden></p>
+      <button id="enter-xr" type="button">Enter mixed reality</button>
+      <p id="landing-fallback" class="fallback" hidden>
+        Open this page in the Meta Quest Browser
+      </p>
+      <p class="note">
+        Best on Meta Quest 3 / 3S with hand tracking. Controllers optional.
+      </p>
+    </div>
+
+    <script>
+      (function () {
+        var el = document.getElementById('landing-streak');
+        if (!el) return;
+        try {
+          var raw = localStorage.getItem('daily-stack-v1');
+          if (!raw) return;
+          var state = JSON.parse(raw);
+          var streak =
+            state && typeof state.streak === 'number' ? Math.floor(state.streak) : 0;
+          if (streak < 1) return;
+          function key(d) {
+            return (
+              d.getFullYear() +
+              '-' +
+              String(d.getMonth() + 1).padStart(2, '0') +
+              '-' +
+              String(d.getDate()).padStart(2, '0')
+            );
+          }
+          var today = new Date();
+          var yesterday = new Date(today.getTime() - 86400000);
+          if (state.lastWinDate !== key(today) && state.lastWinDate !== key(yesterday)) {
+            return;
+          }
+          el.textContent = 'Streak ' + streak;
+          el.hidden = false;
+        } catch (err) {
+          /* Storage unavailable or malformed: the card stays text-only. */
+        }
+      })();
+    </script>
+    <script type="module" src="/src/index.ts"></script>
+  </body>
+</html>
